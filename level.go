@@ -21,9 +21,13 @@
 package zap
 
 import (
+	"errors"
+
 	"go.uber.org/atomic"
 	"go.uber.org/zap/zapcore"
 )
+
+var errMarshalNilLevel = errors.New("can't marshal a nil *AtomicLevel to text")
 
 const (
 	// DebugLevel logs are typically voluminous, and are usually disabled in
@@ -105,4 +109,13 @@ func (lvl *AtomicLevel) UnmarshalText(text []byte) error {
 
 	lvl.SetLevel(l)
 	return nil
+}
+
+func (lvl *AtomicLevel) MarshalText() (text []byte, err error) {
+	if lvl == nil {
+		return nil, errMarshalNilLevel
+	}
+
+	l := lvl.Level()
+	return l.MarshalText()
 }
